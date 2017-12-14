@@ -1,0 +1,7 @@
+# Prototyping a Remote controlled robot
+
+## Keys
+1. Events: robotic behaviors
+2. Communications: BLE, UART
+3. Operations and Env: process, boot-config
+4. Other hardware scripts: AppInventor, microbits
