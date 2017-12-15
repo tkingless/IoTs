@@ -17,9 +17,12 @@ class UARTobj(object):
 
 	    PIobj.set_mode(TX,pigpio.OUTPUT)
 	    PIobj.set_mode(RX,pigpio.INPUT)
-	    #PIobj.exceptions = False
-	    #PIobj.bb_serial_read_close(self.RX)
-	    #PIobj.exceptions = True
+
+	    try:
+                PIobj.bb_serial_read_close(self.RX)
+            except:
+                pass
+
 	    PIobj.bb_serial_read_open(self.RX,baudRate,bits)
 
         def WriteBytes(self,data):
@@ -28,6 +31,9 @@ class UARTobj(object):
             PIobj.wave_send_once(self.wid)
 
         def ReadBytes(self):
+            """
+            str(data.decode()) to get string
+            """
             #count = 1
             #bytess = bytearray()
             #while count:
@@ -37,9 +43,9 @@ class UARTobj(object):
                 #time.sleep(ten_char_time)
 
             (count,data) = PIobj.bb_serial_read(self.RX)
-            print "count: {0} data: {1}".format(count,data)
+            #print "count: {0} data: {1}".format(count,data)
                 
-            return data
+            return count, data
             
         def configureWave(self,data):
             PIobj.wave_clear()
