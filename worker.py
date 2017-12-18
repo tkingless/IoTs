@@ -15,7 +15,7 @@ class UARTadapter(threading.Thread):
             (cnt,readBytes) = self.uart.ReadBytes()
             time.sleep(float(0.02))
             if cnt > 0:
-                WhenBytesRead(readBytes)
+                self.WhenBytesRead(readBytes)
 
         return
 
@@ -25,6 +25,7 @@ class UARTadapter(threading.Thread):
 
     def SetReadCB(self,cb):
         self.userCB = cb
+        self.start()
         return
 
     def WhenBytesRead(self,data):
@@ -33,25 +34,7 @@ class UARTadapter(threading.Thread):
 
     def Terminate(self):
         self.uart.Delete()
-"""    
-def worker():
-    print "Worker init"
-
-    UARTadpt = UARTadapter(23,24)
-    UARTadpt.start()
-
-    while UARTadpt.isAlive():
-        pass
-    
-    return
-
-t = threading.Thread(target=worker)
-t.start()
-t.join()
-
-
-print 'Main() finished'
-"""
+        self.userCB = None
 
             
 
