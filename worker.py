@@ -1,12 +1,12 @@
 import threading
-from Networks import networking
+from Communications import Protocols
 import time
 
 class UARTadapter(threading.Thread):
 
     def __init__(self,TX,RX):
         threading.Thread.__init__(self)
-        self.uart = networking.UARTobj(TX,RX)
+        self.uart = Protocols.UARTobj(TX,RX)
         self.userCB = None
         return
 
