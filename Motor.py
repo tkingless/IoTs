@@ -26,22 +26,6 @@ class Servo(object):
         self.antiClk = antiClk
         return
 
-##    def Combo(self):
-##        interval = 0.25
-##        self.WritePos(1500)
-##        time.sleep(float(interval))
-##        self.WritePos(2200)
-##        time.sleep(float(interval))
-##        self.WritePos(1500)
-##        time.sleep(float(interval))
-##        self.WritePos(2200)
-##        time.sleep(float(interval))
-##        self.WritePos(1500)
-##        time.sleep(float(interval))
-##        self.WritePos(0)
-##
-##    def AutoZero(self):
-
     def Delete(self):
         self.WritePos(0)
         return
@@ -85,7 +69,9 @@ class ServoCtlr(threading.Thread):
                         if(tmp >= self.xp[-1]):
                             self.isAnimating = False
                             
-                        self.servo.WritePos(Interpolate(int(tmp),self.xp.tolist(),self.fp.tolist(),right=1500))
+                        self.servo.WritePos(
+                            Interpolate(int(tmp),self.xp.tolist(),
+                                        self.fp.tolist(),right=1500))
                         self.lastSetTP = current_milli
             else:
                 #Not Animating:
@@ -94,7 +80,6 @@ class ServoCtlr(threading.Thread):
                     #auto Zero positioning
                     self.servo.WritePos(0)
                     self.lastSetTP = -1
-                    print('finish ani')
         return
 
     def Animate(self):
@@ -106,6 +91,7 @@ class ServoCtlr(threading.Thread):
 
     def Terminate(self):
         #This object must Terminate() before release
+        self.servo.Delete()
         self.isAlive = False
         return
 

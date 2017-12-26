@@ -3,7 +3,7 @@
 import sys, os, time, atexit
 from signal import SIGTERM
  
-class Daemon:
+class Daemon(object):
         """
         A generic daemon class.
        
@@ -14,6 +14,7 @@ class Daemon:
                 self.stdout = stdout
                 self.stderr = stderr
                 self.pidfile = pidfile
+                #TODO add customization of OSpath
        
         def daemonize(self):
                 """
@@ -31,7 +32,7 @@ class Daemon:
                         sys.exit(1)
        
                 # decouple from parent environment
-                os.chdir("/")
+                os.chdir("/tmp/Robot")
                 os.setsid()
                 os.umask(0)
        
