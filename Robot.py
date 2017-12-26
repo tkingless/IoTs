@@ -23,7 +23,7 @@ class Robotd(Daemon):
 
     def __init__(self,pidFile):
         super(Robotd, self).__init__(pidFile,stdout='/tmp/Robot/stdout',
-                                     stderr='/tmp/Robot/stderr')
+                                     stderr='/tmp/Robot/stderr',ospath='/tmp/Robot')
         
         """This robot daemon initialization cannot put here, not belong to the daemon
         #self.LmicroBit = UARTadapter(23,24)

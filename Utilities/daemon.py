@@ -9,12 +9,13 @@ class Daemon(object):
        
         Usage: subclass the Daemon class and override the run() method
         """
-        def __init__(self, pidfile, stdin='/dev/null', stdout='/dev/null', stderr='/dev/null'):
+        def __init__(self, pidfile, stdin='/dev/null',
+                     stdout='/dev/null', stderr='/dev/null', ospath='/'):
                 self.stdin = stdin
                 self.stdout = stdout
                 self.stderr = stderr
                 self.pidfile = pidfile
-                #TODO add customization of OSpath
+                self.ospath = ospath
        
         def daemonize(self):
                 """
@@ -32,7 +33,7 @@ class Daemon(object):
                         sys.exit(1)
        
                 # decouple from parent environment
-                os.chdir("/tmp/Robot")
+                os.chdir(self.ospath)
                 os.setsid()
                 os.umask(0)
        
