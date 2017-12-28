@@ -26,22 +26,6 @@ class Servo(object):
         self.antiClk = antiClk
         return
 
-##    def Combo(self):
-##        interval = 0.25
-##        self.WritePos(1500)
-##        time.sleep(float(interval))
-##        self.WritePos(2200)
-##        time.sleep(float(interval))
-##        self.WritePos(1500)
-##        time.sleep(float(interval))
-##        self.WritePos(2200)
-##        time.sleep(float(interval))
-##        self.WritePos(1500)
-##        time.sleep(float(interval))
-##        self.WritePos(0)
-##
-##    def AutoZero(self):
-
     def Delete(self):
         self.WritePos(0)
         return
@@ -57,6 +41,7 @@ class ServoCtlr(threading.Thread):
 
     def __init__(self,servo):
         threading.Thread.__init__(self)
+        self.lock = threading.Lock()
         self.servo = servo
         self.isAlive = True
         
@@ -73,7 +58,6 @@ class ServoCtlr(threading.Thread):
 
     def run(self):
         while self.isAlive:
-
             current_milli = ServoCtlr.GetMillis()
             if self.isAnimating:
                 if(current_milli >= self.aniStartOffStamp):
@@ -85,7 +69,9 @@ class ServoCtlr(threading.Thread):
                         if(tmp >= self.xp[-1]):
                             self.isAnimating = False
                             
-                        self.servo.WritePos(Interpolate(int(tmp),self.xp.tolist(),self.fp.tolist(),right=1500))
+                        self.servo.WritePos(
+                            Interpolate(int(tmp),self.xp.tolist(),
+                                        self.fp.tolist(),right=1500))
                         self.lastSetTP = current_milli
             else:
                 #Not Animating:
@@ -94,7 +80,6 @@ class ServoCtlr(threading.Thread):
                     #auto Zero positioning
                     self.servo.WritePos(0)
                     self.lastSetTP = -1
-                    print('finish ani')
         return
 
     def Animate(self):
@@ -106,7 +91,13 @@ class ServoCtlr(threading.Thread):
 
     def Terminate(self):
         #This object must Terminate() before release
-        self.isAlive = False
+        self.lock.acquire()
+        try:
+            #Ensure the ServoCtl main loop stop after this func
+            self.isAlive = False
+        finally:
+            self.lock.release()
+        self.servo.Delete()
         return
 
     #TODO put into Utility

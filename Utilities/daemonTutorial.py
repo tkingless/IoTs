@@ -26,7 +26,7 @@ import sys              # System-specific parameters and functions.
 UMASK = 0
 
 # Default working directory for the daemon.
-WORKDIR = "/"
+WORKDIR = "/tmp"
 
 # Default maximum for the number of available file descriptors.
 MAXFD = 1024
@@ -174,6 +174,7 @@ def createDaemon():
 
    return(0)
 
+import time
 if __name__ == "__main__":
 
    retCode = createDaemon()
@@ -198,6 +199,10 @@ if __name__ == "__main__":
    """ % (retCode, os.getpid(), os.getppid(), os.getpgrp(), os.getsid(0),
    os.getuid(), os.geteuid(), os.getgid(), os.getegid())
 
+   #Do something serious here
    open("createDaemon.log", "w").write(procParams + "\n")
+
+   time.sleep(180)
+   #Do something serious here: end
 
    sys.exit(retCode)
