@@ -2,7 +2,7 @@
 import pigpio as pigpio
 import time
 
-baudRate = 9600
+baudRate = 115200
 bits = 8
 ten_char_time = 100.0/float(baudRate)
 PIobj = pigpio.pi()
