@@ -80,6 +80,8 @@ class ServoCtlr(threading.Thread):
                     #auto Zero positioning
                     self.servo.WritePos(0)
                     self.lastSetTP = -1
+
+            time.sleep(0.01)
         return
 
     def Animate(self):
