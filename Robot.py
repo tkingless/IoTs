@@ -15,6 +15,7 @@ import time
 import sys
 import os
 import signal
+import random
 from Utilities.daemon import Daemon
 from Communications import Protocols
 from Communications.Protocols import UARTadapter
@@ -27,6 +28,8 @@ class Robotd(Daemon):
                                      stderr='/tmp/Robot/stderr',ospath='/tmp/Robot')
         signal.signal(signal.SIGUSR1,self.Terminate)
         signal.siginterrupt(signal.SIGUSR1, False)
+        signal.signal(signal.SIGUSR2,self.ShuffleState)
+        signal.siginterrupt(signal.SIGUSR2, False)
         """This robot daemon initialization cannot put here, not belong to the daemon
         #self.LmicroBit = UARTadapter(23,24)
         #Lservo = Servo(4)
@@ -45,6 +48,9 @@ class Robotd(Daemon):
         Lservo = Servo(4)
         self.Leyebrow = ServoCtlr(Lservo)
         self.alive = True
+
+        self.curEvt = EventType.NORMAL
+        self.SetState(self.curEvt)
         return
 
     def run(self):
@@ -53,8 +59,10 @@ class Robotd(Daemon):
         
         while self.alive:
             self.Leyebrow.Animate()
-            print('Robot running... ',os.getpid())
+            #print('Robot running... ',os.getpid())
+            #self.ShuffleState(0,0)
             time.sleep(3)
+            pass
             
         return
 
@@ -93,6 +101,26 @@ class Robotd(Daemon):
             if err.find("No such process") > 0:
                 if os.path.exists(self.pidfile):
                     os.remove(self.pidfile)
+
+    def ShuffleState(self,signum,frame):
+        li = ['N', 'H', 'S', 'A']
+        dataEvt = self.curEvt
+        #print('Before, curEvt: ',self.curEvt,'and is: ',(dataEvt is self.curEvt))
+        
+        while self.curEvt is dataEvt:
+            dataEvt = EventType(random.choice(li))
+            #print('Random drawn data: ',dataEvt)
+
+        #print('curEvt and dataEvt is same: ',(dataEvt is self.curEvt))   
+        self.curEvt = dataEvt
+        self.LmicroBit.WriteBytes(dataEvt.value)
+        #print('Shuffled to data: ',dataEvt,' and curEvt: ',self.curEvt)
+        return
+
+    def SetState(self,eventEnum):
+        data = eventEnum.value
+        self.LmicroBit.WriteBytes(data)
+        return
 
 if __name__ == "__main__":
 
