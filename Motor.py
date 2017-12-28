@@ -41,6 +41,7 @@ class ServoCtlr(threading.Thread):
 
     def __init__(self,servo):
         threading.Thread.__init__(self)
+        self.lock = threading.Lock()
         self.servo = servo
         self.isAlive = True
         
@@ -57,7 +58,6 @@ class ServoCtlr(threading.Thread):
 
     def run(self):
         while self.isAlive:
-
             current_milli = ServoCtlr.GetMillis()
             if self.isAnimating:
                 if(current_milli >= self.aniStartOffStamp):
@@ -91,8 +91,13 @@ class ServoCtlr(threading.Thread):
 
     def Terminate(self):
         #This object must Terminate() before release
+        self.lock.acquire()
+        try:
+            #Ensure the ServoCtl main loop stop after this func
+            self.isAlive = False
+        finally:
+            self.lock.release()
         self.servo.Delete()
-        self.isAlive = False
         return
 
     #TODO put into Utility
