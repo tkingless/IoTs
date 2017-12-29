@@ -81,7 +81,7 @@ class ServoCtlr(threading.Thread):
                     self.servo.WritePos(0)
                     self.lastSetTP = -1
 
-            time.sleep(0.01)
+            time.sleep(0.02)
         return
 
     def Animate(self):
