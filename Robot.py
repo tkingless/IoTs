@@ -28,6 +28,8 @@ class Robotd(Daemon):
                                      stderr='/tmp/Robot/stderr',ospath='/tmp/Robot')
         signal.signal(signal.SIGUSR1,self.Terminate)
         signal.siginterrupt(signal.SIGUSR1, False)
+        #Don't know why, it is the process get killed with this signal, the motor signal reset
+        #if not getting signal through process kill, it behave okay, process kill is for dev only
         signal.signal(signal.SIGUSR2,self.ShuffleState)
         signal.siginterrupt(signal.SIGUSR2, False)
         """This robot daemon initialization cannot put here, not belong to the daemon
@@ -46,21 +48,23 @@ class Robotd(Daemon):
         print 'Robot Init....'
         self.LmicroBit = UARTadapter(23,24)
         Lservo = Servo(4)
+        #The calibration is empirical
+        Lservo.Calibrate(1425,575,2500)
         self.Leyebrow = ServoCtlr(Lservo)
         self.alive = True
 
-        self.curEvt = EventType.NORMAL
-        self.SetState(self.curEvt)
+        self.SetState(EventType.NORMAL)
         return
-
+   
     def run(self):
         
         self.robotInit()
         
         while self.alive:
-            self.Leyebrow.Animate()
+            #self.Leyebrow.Animate()
             #print('Robot running... ',os.getpid())
-            #self.ShuffleState(0,0)
+            time.sleep(0.5)
+            self.ShuffleState(0,0)
             time.sleep(3)
             pass
             
@@ -105,21 +109,35 @@ class Robotd(Daemon):
     def ShuffleState(self,signum,frame):
         li = ['N', 'H', 'S', 'A']
         dataEvt = self.curEvt
-        #print('Before, curEvt: ',self.curEvt,'and is: ',(dataEvt is self.curEvt))
         
         while self.curEvt is dataEvt:
             dataEvt = EventType(random.choice(li))
-            #print('Random drawn data: ',dataEvt)
-
-        #print('curEvt and dataEvt is same: ',(dataEvt is self.curEvt))   
-        self.curEvt = dataEvt
-        self.LmicroBit.WriteBytes(dataEvt.value)
-        #print('Shuffled to data: ',dataEvt,' and curEvt: ',self.curEvt)
+  
+        self.SetState(dataEvt)
         return
 
     def SetState(self,eventEnum):
+        self.curEvt = eventEnum
         data = eventEnum.value
         self.LmicroBit.WriteBytes(data)
+
+        tp = None
+        rp = None
+        #About Motor:
+        if eventEnum is EventType.NORMAL:
+            tp = [0,250]
+            rp = [1500,1500]
+        elif eventEnum is EventType.HAPPY:
+            tp = [0,250,500,750,1000]
+            rp = [1500,2300,1600,2300,1600]
+        elif eventEnum is EventType.SAD:
+            tp = [0,1000]
+            rp = [1500,750]
+        elif eventEnum is EventType.ANGRY:
+            tp = [0,500]
+            rp = [1500,2400]
+
+        self.Leyebrow.Animate(tp,rp)
         return
 
 if __name__ == "__main__":

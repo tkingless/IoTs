@@ -1,5 +1,6 @@
 from Communications import Protocols
 import time
+import numpy as np
 
 PIobj = Protocols.PIobj
 
@@ -17,21 +18,41 @@ class Servo(object):
         pos: = 0(off), 500 (most anti-clockwise) - 2500 (most clockwise)
             remember to set off if not using
         """
-        PIobj.set_servo_pulsewidth(self.pin,pos)
+        try:
+            calpos = self.CalibratedYMXC(pos)
+            PIobj.set_servo_pulsewidth(self.pin,calpos)
+        except:
+            PIobj.set_servo_pulsewidth(self.pin,pos)
+            
         return
 
     def Calibrate(self,zero,clk,antiClk):
         self.zero = zero
+        #small number
         self.clk = clk
+        #large number
         self.antiClk = antiClk
+
+        x = np.array([500,1500,2500])
+        y = np.array([self.clk,self.zero,self.antiClk])
+        A = np.vstack([x,np.ones(len(x))]).T
+        m, c = np.linalg.lstsq(A,y)[0]
+        self.m = m
+        self.c = c
         return
 
+    def CalibratedYMXC(self,x):
+        if x == 0:
+            return 0
+        y = int(self.m * x + self.c)
+        y = max(min(y,self.antiClk),self.clk)
+        return y
+    
     def Delete(self):
         self.WritePos(0)
         return
 
 import threading
-import numpy as np
 from numpy import interp as Interpolate
 
 class ServoCtlr(threading.Thread):
@@ -47,8 +68,8 @@ class ServoCtlr(threading.Thread):
         
         #Animation Params
         self.isAnimating = False
-        self.xp = None #checkout numpy interp from SciPy.org 
-        self.fp = None
+        self.tp = None #checkout numpy interp from SciPy.org 
+        self.rp = None
         self.aniStartOffStamp = 0
         self.aniLastUpdate = 0
         self.lastSetTP = 0
@@ -66,12 +87,12 @@ class ServoCtlr(threading.Thread):
 
                         tmp = current_milli - self.aniStartOffStamp
                         
-                        if(tmp >= self.xp[-1]):
+                        if(tmp >= self.tp[-1]):
                             self.isAnimating = False
                             
                         self.servo.WritePos(
-                            Interpolate(int(tmp),self.xp.tolist(),
-                                        self.fp.tolist(),right=1500))
+                            Interpolate(int(tmp),self.tp.tolist(),
+                                        self.rp.tolist(),right=1500))
                         self.lastSetTP = current_milli
             else:
                 #Not Animating:
@@ -84,11 +105,25 @@ class ServoCtlr(threading.Thread):
             time.sleep(0.02)
         return
 
-    def Animate(self):
+    def SetPos(self,pos):
+        self.servo.WritePos(pos)
+        return
+
+    def Animate(self,tp,rp):
+        """
+        tp: time point array, rp: rotation point array
+        """
         self.isAnimating = True
-        self.xp = np.array([0,250,500,750,1000])
         self.aniStartOffStamp = ServoCtlr.GetMillis()
-        self.fp = np.array([1500,2300,1600,2300,1600])
+        self.tp = np.array(tp)
+        self.rp = np.array(rp)
+        return
+
+    def TestAnimate1(self):
+        tp = [0,250,500,750,1000]
+        #note rp 1500 is supposed the current pos of motor
+        rp = [1500,2300,1600,2300,1600]
+        self.Animate(tp,rp)
         return
 
     def Terminate(self):
