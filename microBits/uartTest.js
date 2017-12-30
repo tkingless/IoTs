@@ -12,13 +12,6 @@ basic.forever(() => {
     if (!(readData == "")) {
         if (readData == "N") {
             basic.showLeds(`
-                . . # . .
-                # # # # .
-                # . # # .
-                # # # # .
-                . # # # .
-                `)
-            basic.showLeds(`
                 . . . . .
                 . . . . .
                 # # # # .
@@ -32,6 +25,24 @@ basic.forever(() => {
                 # . # # .
                 # # # # .
                 . # # # .
+                `)
+        }
+        if (readData == "A") {
+            basic.showLeds(`
+                # . # . #
+                # # # # #
+                # # # # #
+                # # # # #
+                . # # # .
+                `)
+        }
+        if (readData == "H") {
+            basic.showLeds(`
+                . . # . .
+                . # # # .
+                # # # # #
+                . # # # .
+                . . # . .
                 `)
         }
     }
