@@ -49,7 +49,7 @@ class Robotd(Daemon):
         self.LmicroBit = UARTadapter(23,24)
         Lservo = Servo(4)
         #The calibration is empirical
-        Lservo.Calibrate(1425,575,2500)
+        #Lservo.Calibrate(1425,575,2500)
         self.Leyebrow = ServoCtlr(Lservo)
         self.alive = True
 
@@ -63,9 +63,8 @@ class Robotd(Daemon):
         while self.alive:
             #self.Leyebrow.Animate()
             #print('Robot running... ',os.getpid())
-            time.sleep(0.5)
+            time.sleep(6)
             self.ShuffleState(0,0)
-            time.sleep(3)
             pass
             
         return
@@ -125,17 +124,17 @@ class Robotd(Daemon):
         rp = None
         #About Motor:
         if eventEnum is EventType.NORMAL:
-            tp = [0,250]
-            rp = [1500,1500]
+            tp = [0,250,2000]
+            rp = [1500,1500,1500]
         elif eventEnum is EventType.HAPPY:
-            tp = [0,250,500,750,1000]
-            rp = [1500,2300,1600,2300,1600]
+            tp = [0,500,1100,1500,2000,2200,3200,3700,4000]
+            rp = [1500,2300,1600,2300,1600,2300,1600,2300,1600]
         elif eventEnum is EventType.SAD:
-            tp = [0,1000]
-            rp = [1500,750]
+            tp = [0,1000,10000]
+            rp = [1500,1200,1200]
         elif eventEnum is EventType.ANGRY:
-            tp = [0,500]
-            rp = [1500,2400]
+            tp = [0,500,8000]
+            rp = [1500,2200,2200]
 
         self.Leyebrow.Animate(tp,rp)
         return
