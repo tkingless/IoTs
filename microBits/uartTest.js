@@ -18,7 +18,6 @@ basic.forever(() => {
                 . . . . .
                 . . . . .
                 `)
-            basic.pause(300)
             basic.showLeds(`
                 . . . . .
                 . . # . .
@@ -26,7 +25,7 @@ basic.forever(() => {
                 . . # . .
                 . . . . .
                 `)
-            basic.pause(500)
+            basic.pause(300)
             basic.showLeds(`
                 . . # . .
                 . # . # .
@@ -36,15 +35,14 @@ basic.forever(() => {
                 `)
         }
         if (readData == "A") {
-            for (let i = 0; i < 4; i++) {
+            for (let i = 0; i < 3; i++) {
                 basic.showLeds(`
                     . . . # .
                     . # # . .
-                    # . # . #
+                    # . # # .
                     # # # # #
                     . # # # .
                     `)
-                basic.pause(100)
                 basic.showLeds(`
                     . . # . .
                     . # . # .
@@ -52,78 +50,47 @@ basic.forever(() => {
                     # . # . #
                     . # # # .
                     `)
-                basic.pause(100)
                 basic.showLeds(`
                     . # . . .
                     . . # # .
-                    # . # . #
+                    . # # . #
                     # # # # #
                     . # # # .
                     `)
-                basic.pause(100)
                 basic.showLeds(`
                     . . # . .
-                    . # # # .
+                    . # . # .
                     # # # # #
                     # . # . #
                     . # # # .
                     `)
-                basic.pause(100)
             }
         }
         if (readData == "H") {
-            for (let i = 0; i < 4; i++) {
-                basic.showLeds(`
-                    . . . . .
-                    . . . . .
-                    . . # . .
-                    . . . . .
-                    . . . . .
-                    `)
-                basic.pause(200)
-                basic.showLeds(`
-                    . . . . .
-                    . . # . .
-                    . # # # .
-                    . . # . .
-                    . . . . .
-                    `)
-                basic.pause(200)
-                basic.showLeds(`
-                    # . # . #
-                    . # # . .
-                    # # . # #
-                    . # # # .
-                    # . # . #
-                    `)
-                basic.pause(200)
-                basic.showLeds(`
-                    . . . . .
-                    . . # . .
-                    . # # # .
-                    . . # . .
-                    . . . . .
-                    `)
-            }
+            basic.showLeds(`
+                . . . . .
+                . # # # .
+                # # . # #
+                # . . . #
+                . . . . .
+                `)
         }
         if (readData == "S") {
-            basic.pause(100)
             basic.showLeds(`
-                . . . . .
                 . . # . .
-                . # # # .
+                . # . . .
+                # # # . .
+                . # . . .
                 . . # . .
-                . . . . .
                 `)
             basic.pause(100)
             basic.showLeds(`
-                . . . # .
+                . . # # .
+                . # . . .
+                # # # # .
+                . # . . #
                 . . # . .
-                . # # # #
-                . . # . .
-                . . . # .
                 `)
-            basic.pause(500)
         }
     }
 })
