@@ -62,7 +62,12 @@ class RobotdEmotionDesc(GATT.Descriptor):
 import dbus
 import dbus.service
 import dbus.mainloop.glib
-import gobject
+#import gobject
+
+try:
+  from gi.repository import GLib
+except ImportError:
+  import gobject as GLib
 
 def register_ad_cb():
     print 'Advertisement registered'
@@ -70,36 +75,6 @@ def register_ad_cb():
 def register_ad_error_cb(error):
     print 'Failed to register advertisement: ' + str(error)
     mainloop.quit()
-    
-mainloop = None
-
-#Advertisment impl
-##def main():
-##    global mainloop
-##
-##    dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
-##
-##    ad_manager = Advertising.get_advertisingMng()
-##
-##    bus = dbus.SystemBus()
-##    test_advertisement = TestAdvertisement(bus, 0)
-##
-##    mainloop = gobject.MainLoop()
-##
-##    try:
-##        ad_manager.RegisterAdvertisement(test_advertisement.get_path(), {},
-##                                         reply_handler=register_ad_cb,
-##                                         error_handler=register_ad_error_cb)
-##    except:
-##        print(ad_manager)
-##
-##    mainloop.run()
-
-#GATT service impl
-try:
-  from gi.repository import GLib
-except ImportError:
-  import gobject as GLib
 
 def register_app_cb():
     print('GATT application registered')
@@ -107,27 +82,59 @@ def register_app_cb():
 def register_app_error_cb(error):
     print('Failed to register application: ' + str(error))
     mainloop.quit()
- 
+   
+mainloop = None
+
+#Advertisment impl
 def main():
     global mainloop
 
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 
+    ad_manager = Advertising.get_advertisingMng()
     gatt_service_manager = GATT.get_GATTmng()
 
     bus = dbus.SystemBus()
+    rbtd_advertisement = RobotdAdvertisement(bus, 0)
     app = GATT.GATTrootApp(bus)
     app.add_service(RobotdService(bus,0))
 
     mainloop = GLib.MainLoop()
 
-    print('Registering GATT application...')
-
+    ad_manager.RegisterAdvertisement(rbtd_advertisement.get_path(), {},
+        reply_handler=register_ad_cb,
+        error_handler=register_ad_error_cb)
     #this is not registering the Application dbus service object on systembus,
     #it is enrolled into bluez's, tutorial way to register a dbus service,
     #see the Expt/dbusTest.py, need dbus.Bus.request_name()
     gatt_service_manager.RegisterApplication(app.get_path(), {},
-                                    reply_handler=register_app_cb,
-                                    error_handler=register_app_error_cb)
+        reply_handler=register_app_cb,
+        error_handler=register_app_error_cb)
 
     mainloop.run()
+
+#GATT service impl
+ 
+##def main():
+##    global mainloop
+##
+##    dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
+##
+##    gatt_service_manager = GATT.get_GATTmng()
+##
+##    bus = dbus.SystemBus()
+##    app = GATT.GATTrootApp(bus)
+##    app.add_service(RobotdService(bus,0))
+##
+##    mainloop = GLib.MainLoop()
+##
+##    print('Registering GATT application...')
+##
+##    #this is not registering the Application dbus service object on systembus,
+##    #it is enrolled into bluez's, tutorial way to register a dbus service,
+##    #see the Expt/dbusTest.py, need dbus.Bus.request_name()
+##    gatt_service_manager.RegisterApplication(app.get_path(), {},
+##        reply_handler=register_app_cb,
+##        error_handler=register_app_error_cb)
+##
+##    mainloop.run()
