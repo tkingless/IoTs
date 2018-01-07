@@ -60,6 +60,12 @@ class GATTrootApp(dbus.service.Object):
 
         return response
 
+    def ReleaseFromBluez(self):
+        for service in self.services:
+            service.ReleaseFromBluez()
+            self.remove_from_connection()
+        return
+
 class Service(dbus.service.Object):
     """
     org.bluez.GattService1 interface implementation
@@ -111,6 +117,12 @@ class Service(dbus.service.Object):
             raise InvalidArgsException()
 
         return self.get_properties()[GATT_SERVICE_IFACE]
+
+    def ReleaseFromBluez(self):
+        for charc in self.characteristics:
+            charc.ReleaseFromBluez()
+            self.remove_from_connection()
+        return
 
 
 class Characteristic(dbus.service.Object):
@@ -189,6 +201,11 @@ class Characteristic(dbus.service.Object):
     def PropertiesChanged(self, interface, changed, invalidated):
         pass
 
+    def ReleaseFromBluez(self):
+        for desc in self.descriptors:
+            desc.ReleaseFromBluez()
+            self.remove_from_connection()
+        return
 
 class Descriptor(dbus.service.Object):
     """
@@ -234,6 +251,10 @@ class Descriptor(dbus.service.Object):
     def WriteValue(self, value, options):
         print('Default WriteValue called, returning error')
         raise NotSupportedException()
+
+    def ReleaseFromBluez(self):
+        self.remove_from_connection()
+        return
 
 def get_adapter_GATTmng():
     #this might not work, since find_adapter(), props.keys()
