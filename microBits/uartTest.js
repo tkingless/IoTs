@@ -46,7 +46,7 @@ basic.forever(() => {
                 basic.showLeds(`
                     . . # . .
                     . # . # .
-                    # # # # #
+                    # # . # #
                     # . # . #
                     . # # # .
                     `)
@@ -60,7 +60,7 @@ basic.forever(() => {
                 basic.showLeds(`
                     . . # . .
                     . # . # .
-                    # # # # #
+                    # # . # #
                     # . # . #
                     . # # # .
                     `)
@@ -77,13 +77,33 @@ basic.forever(() => {
         }
         if (readData == "S") {
             basic.showLeds(`
-                . . # . .
+                . . . . .
                 . # . . .
                 # # # . .
                 . # . . .
                 . . # . .
                 `)
-            basic.pause(100)
+            basic.showLeds(`
+                . . . . .
+                . # . . .
+                # # # # .
+                . # . . .
+                . . # . .
+                `)
+            basic.showLeds(`
+                . . # . .
+                . # . . .
+                # # # # .
+                . # . . #
+                . . # . .
+                `)
+            basic.showLeds(`
+                . . # . .
+                . # . . .
+                # # # # .
+                . # . . #
+                . . # . .
+                `)
             basic.showLeds(`
                 . . # # .
                 . # . . .
