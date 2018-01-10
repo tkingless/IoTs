@@ -33,16 +33,21 @@ class RobotdEmotionCharc(GATT.Characteristic):
         GATT.Characteristic.__init__(self, bus, index,
             self._UUID,['write'],service)
         self.add_descriptor(RobotdEmotionDesc(bus, 2, self))
+        self.writeStrDelegate = None
+
+    def SubscribeDele(self,cb):
+        self.writeStrDelegate = cb
 
     def WriteValue(self, value, options):
-        print('WriteValue() called')
 
         if len(value) != 1:
             raise InvalidValueLengthException()
 
         byte = value[0]
-        #print('Written value: ' + repr(byte))
         print('Written value: ' + repr(byte))
+        if self.writeStrDelegate is not None:
+            self.writeStrDelegate(chr(byte))
+            
         return
 
 class RobotdEmotionDesc(GATT.Descriptor):
@@ -132,6 +137,9 @@ class RobotdBLE(threading.Thread):
 ##        self.GATTapp.services[0].characteristics[0].descriptors[0].remove_from_connection()
         self.mainloop.quit()
         return
+
+    def AddEmotionWriteCallback(self,cb):
+        self.GATTapp.services[0].characteristics[0].SubscribeDele(cb)
 
     def register_ad_cb(self):
         print 'Advertisement registered'

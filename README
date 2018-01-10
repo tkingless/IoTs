@@ -5,3 +5,11 @@
 2. Communications: BLE, UART
 3. Operations and Env: process, boot-config
 4. Other hardware scripts: AppInventor, microbits
+
+##Usage
+1. source the UART venv
+2. sudo pigpiod
+3. create /tmp/Robot/ folder
+4. python Robot.py start
+5. python Robot.py stop
+

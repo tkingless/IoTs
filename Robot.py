@@ -19,6 +19,7 @@ import random
 from Utilities.daemon import Daemon
 from Communications import Protocols
 from Communications.Protocols import UARTadapter
+from Communications.BLE.Objects import RobotdBLE
 from Motor import Servo, ServoCtlr
 
 class Robotd(Daemon):
@@ -46,6 +47,7 @@ class Robotd(Daemon):
 
     def robotInit(self):
         print 'Robot Init....'
+        #UARTadapter(TX,RX)
         self.LmicroBit = UARTadapter(23,24)
         Lservo = Servo(4)
         #The calibration is empirical
@@ -54,6 +56,9 @@ class Robotd(Daemon):
         self.alive = True
 
         self.SetState(EventType.NORMAL)
+        self.BLEadapter = RobotdBLE()
+        self.BLEadapter.Enable()
+        self.BLEadapter.AddEmotionWriteCallback(self.BLEemotionCB)
         return
    
     def run(self):
@@ -64,7 +69,8 @@ class Robotd(Daemon):
             #self.Leyebrow.Animate()
             #print('Robot running... ',os.getpid())
             time.sleep(6)
-            self.ShuffleState(0,0)
+            #self.ShuffleState(0,0)
+            self.CheckBLEState()
             pass
             
         return
@@ -75,6 +81,7 @@ class Robotd(Daemon):
         self.alive = False
         self.Leyebrow.Terminate()
         self.LmicroBit.Terminate()
+        self.BLEadapter.Disable()
         return
     
     def stop(self):
@@ -114,6 +121,17 @@ class Robotd(Daemon):
   
         self.SetState(dataEvt)
         return
+
+    def BLEemotionCB(self,writeVal):
+        self.BLEemotionValue = writeVal
+
+    def CheckBLEState(self):
+        try:
+            self.curEvt = EventType(self.BLEemotionValue)
+            self.SetState(self.curEvt)
+            print('CheckState() from BLE, SetState() ',self.BLEemotionValue)
+        except:
+            pass
 
     def SetState(self,eventEnum):
         self.curEvt = eventEnum
