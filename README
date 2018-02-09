@@ -13,3 +13,20 @@
 4. python Robot.py start
 5. python Robot.py stop
 
+##Installation from fresh OS
+
+1. Set Englsih Lang, password, username and etc.
+
+
+2. Install bluez 5.48: http://www.bluez.org/download/
+3. Install dependencies: sudo apt-get install -y libusb-dev libdbus-1-dev libglib2.0-dev libudev-dev libical-dev libreadline-dev
+4. Turn the bluetooth service's BLE feature: sudo nano /lib/systemd/system/bluetooth.service, enable --experimental feature
+
+5. Setup Github environment
+6. Download source code
+
+
+##Android BLE central to RPi peripheral cycle:
+
+bluetooth paired -> advertisment scanning -> connected
+disconnect -> bluetooth dispaired 
