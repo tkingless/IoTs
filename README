@@ -30,3 +30,15 @@
 
 bluetooth paired -> advertisment scanning -> connected
 disconnect -> bluetooth dispaired 
+
+
+##Connection pins
+
+1. Lmicrobit pin 1 - RPi 23
+2. Lmicrobit pin 0 - RPi 24
+3. Rmicrobit pin 0 - RPi 25
+4. Rmicrobit pin 1 - RPi 18
+5. Servo Vcc red line - 5v
+6. Servo Grd brown line - 0v
+7. Lservo signal - RPi 4
+8. Rservo signal - RPi 12
