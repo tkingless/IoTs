@@ -51,9 +51,11 @@ class Robotd(Daemon):
         self.LmicroBit = UARTadapter(23,24)
         self.RmicroBit = UARTadapter(18,25)
         Lservo = Servo(4)
+        Rservo = Servo(12)
         #The calibration is empirical
         #Lservo.Calibrate(1425,575,2500)
         self.Leyebrow = ServoCtlr(Lservo)
+        self.Reyebrow = ServoCtlr(Rservo)
         self.alive = True
 
         self.SetState(EventType.NORMAL)
@@ -81,6 +83,7 @@ class Robotd(Daemon):
         print('Robot Terminating... ',os.getpid())
         self.alive = False
         self.Leyebrow.Terminate()
+        self.Reyebrow.Terminate()
         self.LmicroBit.Terminate()
         self.RmicroBit.Terminate()
         self.BLEadapter.Disable()
@@ -147,17 +150,22 @@ class Robotd(Daemon):
         if eventEnum is EventType.NORMAL:
             tp = [0,250,2000]
             rp = [1500,1500,1500]
+            rrp = [1500,1500,1500]
         elif eventEnum is EventType.HAPPY:
             tp = [0,500,1100,1500,2000,2200,3200,3700,4000]
             rp = [1500,2300,1600,2300,1600,2300,1600,2300,1600]
+            rrp = [1500,700,1400,700,1400,700,1400,700,1400]
         elif eventEnum is EventType.SAD:
             tp = [0,1000,10000]
             rp = [1500,1200,1200]
+            rrp = [1500,1800,1800]
         elif eventEnum is EventType.ANGRY:
             tp = [0,500,8000]
             rp = [1500,2200,2200]
+            rrp = [1500,800,800]
 
         self.Leyebrow.Animate(tp,rp)
+        self.Reyebrow.Animate(tp,rrp)
         return
 
 if __name__ == "__main__":
