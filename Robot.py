@@ -49,6 +49,7 @@ class Robotd(Daemon):
         print 'Robot Init....'
         #UARTadapter(TX,RX)
         self.LmicroBit = UARTadapter(23,24)
+        self.RmicroBit = UARTadapter(18,25)
         Lservo = Servo(4)
         #The calibration is empirical
         #Lservo.Calibrate(1425,575,2500)
@@ -81,6 +82,7 @@ class Robotd(Daemon):
         self.alive = False
         self.Leyebrow.Terminate()
         self.LmicroBit.Terminate()
+        self.RmicroBit.Terminate()
         self.BLEadapter.Disable()
         return
     
@@ -137,6 +139,7 @@ class Robotd(Daemon):
         self.curEvt = eventEnum
         data = eventEnum.value
         self.LmicroBit.WriteBytes(data)
+        self.RmicroBit.WriteBytes(data)
 
         tp = None
         rp = None
