@@ -28,8 +28,8 @@
 
 ##Android BLE central to RPi peripheral cycle:
 
-bluetooth paired -> advertisment scanning -> connected
-disconnect -> bluetooth dispaired 
+bluetooth paired (Device Level) -> advertisment scanning (App Level) -> connected (App Level)
+disconnect (App Level) -> bluetooth dispaired (Device Level)
 
 
 ##Connection pins
