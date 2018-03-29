@@ -16,6 +16,7 @@ import sys
 import os
 import signal
 import random
+from collections import deque
 from Utilities.daemon import Daemon
 from Communications import Protocols
 from Communications.Protocols import UARTadapter
@@ -58,6 +59,7 @@ class Robotd(Daemon):
         self.Reyebrow = ServoCtlr(Rservo)
         self.alive = True
 
+        self.stateQ = deque([])
         self.SetState(EventType.NORMAL)
         self.BLEadapter = RobotdBLE()
         self.BLEadapter.Enable()
@@ -71,9 +73,9 @@ class Robotd(Daemon):
         while self.alive:
             #self.Leyebrow.Animate()
             #print('Robot running... ',os.getpid())
-            time.sleep(6)
-            #self.ShuffleState(0,0)
-            self.CheckBLEState()
+            time.sleep(0.02)
+            if self.IsBusyToAppendState() != True:
+                self.CheckBLEState()
             pass
             
         return
@@ -118,25 +120,36 @@ class Robotd(Daemon):
                     os.remove(self.pidfile)
 
     def ShuffleState(self,signum,frame):
-        li = ['N', 'H', 'S', 'A']
-        dataEvt = self.curEvt
-        
-        while self.curEvt is dataEvt:
-            dataEvt = EventType(random.choice(li))
-  
-        self.SetState(dataEvt)
+#        li = ['N', 'H', 'S', 'A']
+#        dataEvt = self.curEvt
+#        
+#        while self.curEvt is dataEvt:
+#            dataEvt = EventType(random.choice(li))
+#  
+#        self.SetState(dataEvt)
         return
 
     def BLEemotionCB(self,writeVal):
-        self.BLEemotionValue = writeVal
+        #self.BLEemotionValue = writeVal
+        if len(self.stateQ) < 5:
+            print('stateQ append state: ',writeVal)
+            self.stateQ.append(writeVal)
 
     def CheckBLEState(self):
         try:
-            self.curEvt = EventType(self.BLEemotionValue)
-            self.SetState(self.curEvt)
-            print('CheckState() from BLE, SetState() ',self.BLEemotionValue)
+            if len(self.stateQ) > 0:
+                self.BLEemotionValue = self.stateQ.popleft()
+                self.curEvt = EventType(self.BLEemotionValue)
+                self.SetState(self.curEvt)
+                print('CheckState() from BLE, SetState() ',self.BLEemotionValue)
         except:
             pass
+
+    def IsBusyToAppendState(self):
+        if self.Leyebrow.isAnimating or self.Reyebrow.isAnimating:
+            return True
+        return False
+        
 
     def SetState(self,eventEnum):
         self.curEvt = eventEnum
@@ -152,15 +165,15 @@ class Robotd(Daemon):
             rp = [1500,1500,1500]
             rrp = [1500,1500,1500]
         elif eventEnum is EventType.HAPPY:
-            tp = [0,500,1100,1500,2000,2200,3200,3700,4000]
-            rp = [1500,2300,1600,2300,1600,2300,1600,2300,1600]
-            rrp = [1500,700,1400,700,1400,700,1400,700,1400]
+            tp = [0,500,1100,1500,2000,2200,3200]
+            rp = [1500,2300,1600,2300,1600,2300,1600]
+            rrp = [1500,700,1400,700,1400,700,1400]
         elif eventEnum is EventType.SAD:
-            tp = [0,1000,10000]
+            tp = [0,1000,2500]
             rp = [1500,1200,1200]
             rrp = [1500,1800,1800]
         elif eventEnum is EventType.ANGRY:
-            tp = [0,500,8000]
+            tp = [0,500,2000]
             rp = [1500,2200,2200]
             rrp = [1500,800,800]
 
