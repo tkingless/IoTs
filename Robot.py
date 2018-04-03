@@ -22,6 +22,7 @@ from Communications import Protocols
 from Communications.Protocols import UARTadapter
 from Communications.BLE.Objects import RobotdBLE
 from Motor import Servo, ServoCtlr
+from Buzzer import BuzzerObj,AngryMelody,HappyMelody,NormalMelody,SadMelody
 
 class Robotd(Daemon):
 
@@ -57,6 +58,7 @@ class Robotd(Daemon):
         #Lservo.Calibrate(1425,575,2500)
         self.Leyebrow = ServoCtlr(Lservo)
         self.Reyebrow = ServoCtlr(Rservo)
+        self.Buzzer = BuzzerObj(26)
         self.alive = True
 
         self.stateQ = deque([])
@@ -64,6 +66,8 @@ class Robotd(Daemon):
         self.BLEadapter = RobotdBLE()
         self.BLEadapter.Enable()
         self.BLEadapter.AddEmotionWriteCallback(self.BLEemotionCB)
+
+        
         return
    
     def run(self):
@@ -119,6 +123,7 @@ class Robotd(Daemon):
                 if os.path.exists(self.pidfile):
                     os.remove(self.pidfile)
 
+    #Deprecated
     def ShuffleState(self,signum,frame):
 #        li = ['N', 'H', 'S', 'A']
 #        dataEvt = self.curEvt
@@ -149,7 +154,6 @@ class Robotd(Daemon):
         if self.Leyebrow.isAnimating or self.Reyebrow.isAnimating:
             return True
         return False
-        
 
     def SetState(self,eventEnum):
         self.curEvt = eventEnum
@@ -165,13 +169,14 @@ class Robotd(Daemon):
             rp = [1500,1500,1500]
             rrp = [1500,1500,1500]
         elif eventEnum is EventType.HAPPY:
-            tp = [0,500,1100,1500,2000,2200,3200]
-            rp = [1500,2300,1600,2300,1600,2300,1600]
-            rrp = [1500,700,1400,700,1400,700,1400]
+            tp = [0,200,1100,1500,2000,2200,3200]
+            rp = [1500,2000,1600,2300,1600,2300,1600]
+            rrp = [1500,1000,1400,700,1400,700,1400]
         elif eventEnum is EventType.SAD:
             tp = [0,1000,2500]
             rp = [1500,1200,1200]
             rrp = [1500,1800,1800]
+
         elif eventEnum is EventType.ANGRY:
             tp = [0,500,2000]
             rp = [1500,2200,2200]
@@ -179,6 +184,26 @@ class Robotd(Daemon):
 
         self.Leyebrow.Animate(tp,rp)
         self.Reyebrow.Animate(tp,rrp)
+
+        #non-blockingly play sound
+        import threading
+        soundThread = None
+        buzzer = self.Buzzer
+
+        if eventEnum is EventType.NORMAL:
+            soundThread = threading.Thread(target=buzzer.PlayMelody,args=(NormalMelody,))
+        elif eventEnum is EventType.HAPPY:
+            soundThread = threading.Thread(target=buzzer.PlayMelody,args=(HappyMelody,))
+        elif eventEnum is EventType.SAD:
+            soundThread = threading.Thread(target=buzzer.PlayMelody,args=(SadMelody,))
+        elif eventEnum is EventType.ANGRY:
+            soundThread = threading.Thread(target=buzzer.PlayMelody,args=(AngryMelody,))
+
+        if soundThread is not None:
+            soundThread.start()
+
+        print("Played sound")
+
         return
 
 if __name__ == "__main__":

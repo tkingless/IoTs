@@ -32,6 +32,20 @@ bluetooth paired (Device Level) -> advertisment scanning (App Level) -> connecte
 disconnect (App Level) -> bluetooth dispaired (Device Level)
 
 
+Connection without Blueman, use bluetoothctl instead:
+
+- blutotthctl
+	- remove [dev by MAC]
+	- default-agent
+	- then yes, on the Android side, yes too.
+	- make sure the Andriod shake to confirm connection
+	- exit
+
+## R232 Hardware UART
+
+- ls /dev/cu.*
+- screen /dev/{serialPort} 115200
+
 ##Connection pins
 
 1. Lmicrobit pin 1 - RPi 23
