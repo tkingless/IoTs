@@ -6,7 +6,9 @@ class EventType(Enum):
     HAPPY='H'
     SAD='S'
     ANGRY='A'
+    COUNT='C'
 
+#TODO: not implemented yet
 class ResponseType(Enum):
     OK='O'
     BAD='B'
@@ -23,6 +25,7 @@ from Communications.Protocols import UARTadapter
 from Communications.BLE.Objects import RobotdBLE
 from Motor import Servo, ServoCtlr
 from Buzzer import BuzzerObj,AngryMelody,HappyMelody,NormalMelody,SadMelody
+from RobotCounter import RobotCounter
 
 class Robotd(Daemon):
 
@@ -59,6 +62,7 @@ class Robotd(Daemon):
         self.Leyebrow = ServoCtlr(Lservo)
         self.Reyebrow = ServoCtlr(Rservo)
         self.Buzzer = BuzzerObj(26)
+        self.Counter = RobotCounter(self)
         self.alive = True
 
         self.stateQ = deque([])
@@ -66,7 +70,7 @@ class Robotd(Daemon):
         self.BLEadapter = RobotdBLE()
         self.BLEadapter.Enable()
         self.BLEadapter.AddEmotionWriteCallback(self.BLEemotionCB)
-
+        self.BLEadapter.AddMinuteWriteCallback(self.BLEminuteCB)
         
         return
    
@@ -137,8 +141,12 @@ class Robotd(Daemon):
     def BLEemotionCB(self,writeVal):
         #self.BLEemotionValue = writeVal
         if len(self.stateQ) < 5:
-            print('stateQ append state: ',writeVal)
+            print('stateQ append state: {0}'.format(writeVal))
             self.stateQ.append(writeVal)
+
+    def BLEminuteCB(self,writeVal):
+        print("hihi")
+        self.counterMin = writeVal
 
     def CheckBLEState(self):
         try:
@@ -151,11 +159,12 @@ class Robotd(Daemon):
             pass
 
     def IsBusyToAppendState(self):
-        if self.Leyebrow.isAnimating or self.Reyebrow.isAnimating:
+        if self.Leyebrow.isAnimating or self.Reyebrow.isAnimating or (self.Counter.IsCounting() is True):
             return True
         return False
 
     def SetState(self,eventEnum):
+
         self.curEvt = eventEnum
         data = eventEnum.value
         self.LmicroBit.WriteBytes(data)
@@ -163,6 +172,7 @@ class Robotd(Daemon):
 
         tp = None
         rp = None
+        rrp = None
         #About Motor:
         if eventEnum is EventType.NORMAL:
             tp = [0,250,2000]
@@ -182,8 +192,16 @@ class Robotd(Daemon):
             rp = [1500,2200,2200]
             rrp = [1500,800,800]
 
-        self.Leyebrow.Animate(tp,rp)
-        self.Reyebrow.Animate(tp,rrp)
+        if tp is not None and \
+        rp is not None and \
+        rrp is not None:
+            self.Leyebrow.Animate(tp,rp)
+            self.Reyebrow.Animate(tp,rrp)
+
+        if eventEnum is EventType.COUNT:
+            print("here is called")
+            self.Counter.StartCountDown(0,self.counterMin)
+        
 
         #non-blockingly play sound
         import threading
@@ -201,8 +219,6 @@ class Robotd(Daemon):
 
         if soundThread is not None:
             soundThread.start()
-
-        print("Played sound")
 
         return
 

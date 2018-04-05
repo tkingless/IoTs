@@ -45,7 +45,7 @@ class RobotdEmotionCharc(GATT.Characteristic):
             raise InvalidValueLengthException()
 
         byte = value[0]
-        print('Written value: ' + repr(byte))
+        print('Emotion charc, written value: ' + repr(byte))
         if self.writeStrDelegate is not None:
             self.writeStrDelegate(chr(byte))
             
@@ -79,13 +79,13 @@ class RobotdCounterMinCharc(GATT.Characteristic):
         GATT.Characteristic.__init__(self, bus, index,
             self._UUID,['write','notify'],service)
         self.add_descriptor(RobotdCounterMinDesc(bus, 2, self))
-        self.writeStrDelegate = None
+        self.writeIntDelegate = None
 
         self.notifying = False
         self.minuteVal = 1
 
     def SubscribeDele(self,cb):
-        self.writeStrDelegate = cb
+        self.writeIntDelegate = cb
 
     def WriteValue(self, value, options):
 
@@ -93,9 +93,9 @@ class RobotdCounterMinCharc(GATT.Characteristic):
             raise InvalidValueLengthException()
 
         byte = value[0]
-        print('Written value: ' + repr(byte))
-        if self.writeStrDelegate is not None:
-            self.writeStrDelegate(chr(byte))
+        print('Min charc, written value: ' + repr(byte))
+        if self.writeIntDelegate is not None:
+            self.writeIntDelegate(int(byte))
             
         return
 
@@ -207,6 +207,9 @@ class RobotdBLE(threading.Thread):
 
     def AddMinuteWriteCallback(self,cb):
         self.GATTapp.services[0].characteristics[1].SubscribeDele(cb)
+
+    def GetMinuteCharc(self):
+        return self.GATTapp.services[0].characteristics[1]
 
     def register_ad_cb(self):
         print 'Advertisement registered'

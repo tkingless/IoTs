@@ -16,16 +16,13 @@ class RobotCounter(object):
 
     def __init__(self,robotd):
         self.counter = None
-        self.onCntDelegates = []
-        self.onCntFinishDelegates = []
+        self.robotd = robotd
         return
 
-    def StartCountDown(self,mins,secs):
-
+    def StartCountDown(self,mins=0,secs=10):
         #min max of mins and secs:
         mins = max(0,min(mins,99))
         secs = max(0,min(secs,59))
-
         self.counter = CounterObj(mins,secs)
         self.counter.InvokeCount = self.OnCountCB
         self.counter.InvokeCountFinish = self.OnCountFinishCB
@@ -37,7 +34,9 @@ class RobotCounter(object):
         return
 
     def OnCountCB(self,argMin,argSec):
-        print("bits should be: {0}".format(self.LRmbitsDigits(argMin,argSec))
+        print("bits should be: {0}".format( self.LRmbitsDigits(argMin,argSec) ))
+        self.robotd.BLEadapter.GetMinuteCharc().minuteVal = argSec
+        self.robotd.BLEadapter.GetMinuteCharc().notify_minute_value()
         return
 
     def OnCountFinishCB(self):
@@ -81,7 +80,6 @@ class CounterObj(threading.Thread):
     def run(self):
         minCur = self.minCnt
         secCur = self.secCnt
-
         while (minCur != 0 or secCur != 0) and self.isAlive is True:
             time.sleep(1)
             if secCur is not 0:
@@ -95,7 +93,8 @@ class CounterObj(threading.Thread):
             self.InvokeCount(minCur,secCur)
 
         if self.isAlive is True:
-            print("Count finished")
+            #print("Count finished")
+            self.isAlive = False
             self.InvokeCountFinish()
         else:
             print("Count Interrupted")
@@ -111,6 +110,3 @@ class CounterObj(threading.Thread):
         if self.InovkeCountFinish is not None:
             self.InvokeCountFinish()
         return
-
-def Hello(a,b):
-    print("hello world: {0}, {1}".format(a,b))
