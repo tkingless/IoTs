@@ -44,6 +44,15 @@ class RobotCounter(object):
         #ask the robotd to return Normal state
         return
 
+    def IsCounting(self):
+        if self.counter is None:
+            return False
+
+        if self.counter.isAlive:
+            return True
+        else:
+            return False
+
     def LRmbitsDigits(self,argMin,argSec):
         Ldigit = None
         Rdigit = None

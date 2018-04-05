@@ -22,6 +22,7 @@ class RobotdService(GATT.Service):
     def __init__(self, bus, index):
         GATT.Service.__init__(self, bus, index, self._UUID, True)
         self.add_characteristic(RobotdEmotionCharc(bus, 0, self))
+        self.add_characteristic(RobotdCounterMinCharc(bus, 1, self))
 
 class RobotdEmotionCharc(GATT.Characteristic):
     """
@@ -64,7 +65,70 @@ class RobotdEmotionDesc(GATT.Descriptor):
 
     def ReadValue(self, options):
         return self.value
-    
+
+class RobotdCounterMinCharc(GATT.Characteristic):
+    """
+    This charc for counter's minutes read/write/notify
+    Impletation logic: When central writing a value on the char and also the second charc,
+        central also write 'C' to start count down, changing the robotd's state
+        the central also subscribe to these charcs, get notified
+    """
+    _UUID = '6758ffd3-9458-4b13-95a2-df1093cc818d'
+
+    def __init__(self, bus, index, service):
+        GATT.Characteristic.__init__(self, bus, index,
+            self._UUID,['write','notify'],service)
+        self.add_descriptor(RobotdCounterMinDesc(bus, 2, self))
+        self.writeStrDelegate = None
+
+        self.notifying = False
+        self.minuteVal = 1
+
+    def SubscribeDele(self,cb):
+        self.writeStrDelegate = cb
+
+    def WriteValue(self, value, options):
+
+        if len(value) != 1:
+            raise InvalidValueLengthException()
+
+        byte = value[0]
+        print('Written value: ' + repr(byte))
+        if self.writeStrDelegate is not None:
+            self.writeStrDelegate(chr(byte))
+            
+        return
+
+    def StartNotify(self):
+        self.notifying = True
+
+    def StopNotify(self):
+        self.notifying = False
+
+    def notify_minute_value(self):
+        if not self.notifying:
+            return
+
+        self.PropertiesChanged(
+                GATT.GATT_CHRC_IFACE,
+                { 'Value': [dbus.Byte(self.minuteVal)] }, [])
+
+
+class RobotdCounterMinDesc(GATT.Descriptor):
+    """
+    Characteristic descriptor for RbotodEmotion, use Nordic's RF Connect to test
+    """
+    _UUID = '2902'
+
+    def __init__(self, bus, index, characteristic):
+        self.value = array.array('B', b'Robotd Minute RWN')
+        self.value = self.value.tolist()
+        GATT.Descriptor.__init__(self, bus, index, self._UUID,
+            ['read'], characteristic)
+
+    def ReadValue(self, options):
+        return self.value
+   
 #Implementation of BLE GATT advertising service
 import threading
 import dbus
@@ -140,6 +204,9 @@ class RobotdBLE(threading.Thread):
 
     def AddEmotionWriteCallback(self,cb):
         self.GATTapp.services[0].characteristics[0].SubscribeDele(cb)
+
+    def AddMinuteWriteCallback(self,cb):
+        self.GATTapp.services[0].characteristics[1].SubscribeDele(cb)
 
     def register_ad_cb(self):
         print 'Advertisement registered'
