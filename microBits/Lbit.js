@@ -112,5 +112,8 @@ basic.forever(() => {
                 . . # . .
                 `)
         }
+        if (readData == "0" || (readData == "1" || (readData == "2" || (readData == "3" || (readData == "4" || (readData == "5" || (readData == "6" || (readData == "7" || (readData == "8" || readData == "9"))))))))) {
+            basic.showString(readData)
+        }
     }
 })
