@@ -71,6 +71,7 @@ class Robotd(Daemon):
         self.BLEadapter.Enable()
         self.BLEadapter.AddEmotionWriteCallback(self.BLEemotionCB)
         self.BLEadapter.AddMinuteWriteCallback(self.BLEminuteCB)
+        self.BLEadapter.AddSecondWriteCallback(self.BLEsecondCB)
         
         return
    
@@ -145,8 +146,10 @@ class Robotd(Daemon):
             self.stateQ.append(writeVal)
 
     def BLEminuteCB(self,writeVal):
-        print("hihi")
         self.counterMin = writeVal
+
+    def BLEsecondCB(self,writeVal):
+        self.counterSec = writeVal
 
     def CheckBLEState(self):
         try:
@@ -159,7 +162,8 @@ class Robotd(Daemon):
             pass
 
     def IsBusyToAppendState(self):
-        if self.Leyebrow.isAnimating or self.Reyebrow.isAnimating or (self.Counter.IsCounting() is True):
+        if self.Leyebrow.isAnimating or self.Reyebrow.isAnimating or \
+        (self.Counter.IsCounting() is True):
             return True
         return False
 
@@ -199,8 +203,7 @@ class Robotd(Daemon):
             self.Reyebrow.Animate(tp,rrp)
 
         if eventEnum is EventType.COUNT:
-            print("here is called")
-            self.Counter.StartCountDown(0,self.counterMin)
+            self.Counter.StartCountDown(self.counterMin,self.counterSec)
         
 
         #non-blockingly play sound

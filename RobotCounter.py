@@ -35,12 +35,15 @@ class RobotCounter(object):
 
     def OnCountCB(self,argMin,argSec):
         print("bits should be: {0}".format( self.LRmbitsDigits(argMin,argSec) ))
-        self.robotd.BLEadapter.GetMinuteCharc().minuteVal = argSec
+        self.robotd.BLEadapter.GetMinuteCharc().minuteVal = argMin
         self.robotd.BLEadapter.GetMinuteCharc().notify_minute_value()
+        self.robotd.BLEadapter.GetSecondCharc().secondVal = argSec
+        self.robotd.BLEadapter.GetSecondCharc().notify_second_value()
         return
 
     def OnCountFinishCB(self):
         #ask the robotd to return Normal state
+        print('Count finish')
         return
 
     def IsCounting(self):

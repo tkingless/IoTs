@@ -23,6 +23,7 @@ class RobotdService(GATT.Service):
         GATT.Service.__init__(self, bus, index, self._UUID, True)
         self.add_characteristic(RobotdEmotionCharc(bus, 0, self))
         self.add_characteristic(RobotdCounterMinCharc(bus, 1, self))
+        self.add_characteristic(RobotdCounterSecCharc(bus, 2, self))
 
 class RobotdEmotionCharc(GATT.Characteristic):
     """
@@ -116,12 +117,68 @@ class RobotdCounterMinCharc(GATT.Characteristic):
 
 class RobotdCounterMinDesc(GATT.Descriptor):
     """
-    Characteristic descriptor for RbotodEmotion, use Nordic's RF Connect to test
+    Characteristic descriptor for Robotd's counter min, use Nordic's RF Connect to test
     """
     _UUID = '2902'
 
     def __init__(self, bus, index, characteristic):
         self.value = array.array('B', b'Robotd Minute RWN')
+        self.value = self.value.tolist()
+        GATT.Descriptor.__init__(self, bus, index, self._UUID,
+            ['read'], characteristic)
+
+    def ReadValue(self, options):
+        return self.value
+
+class RobotdCounterSecCharc(GATT.Characteristic):
+
+    _UUID = '705b7354-a93e-4257-9e77-a371c15479b4'
+
+    def __init__(self, bus, index, service):
+        GATT.Characteristic.__init__(self, bus, index,
+            self._UUID,['write','notify'],service)
+        self.add_descriptor(RobotdCounterSecDesc(bus, 2, self))
+        self.writeIntDelegate = None
+
+        self.notifying = False
+        self.secondVal = 1
+
+    def SubscribeDele(self,cb):
+        self.writeIntDelegate = cb
+
+    def WriteValue(self, value, options):
+
+        if len(value) != 1:
+            raise InvalidValueLengthException()
+
+        byte = value[0]
+        print('Sec charc, written value: ' + repr(byte))
+        if self.writeIntDelegate is not None:
+            self.writeIntDelegate(int(byte))
+            
+        return
+
+    def StartNotify(self):
+        self.notifying = True
+
+    def StopNotify(self):
+        self.notifying = False
+
+    def notify_second_value(self):
+        if not self.notifying:
+            return
+
+        self.PropertiesChanged(
+                GATT.GATT_CHRC_IFACE,
+                { 'Value': [dbus.Byte(self.secondVal)] }, [])
+
+
+class RobotdCounterSecDesc(GATT.Descriptor):
+
+    _UUID = '2903'
+
+    def __init__(self, bus, index, characteristic):
+        self.value = array.array('B', b'Robotd Second RWN')
         self.value = self.value.tolist()
         GATT.Descriptor.__init__(self, bus, index, self._UUID,
             ['read'], characteristic)
@@ -208,8 +265,14 @@ class RobotdBLE(threading.Thread):
     def AddMinuteWriteCallback(self,cb):
         self.GATTapp.services[0].characteristics[1].SubscribeDele(cb)
 
+    def AddSecondWriteCallback(self,cb):
+        self.GATTapp.services[0].characteristics[2].SubscribeDele(cb)
+
     def GetMinuteCharc(self):
         return self.GATTapp.services[0].characteristics[1]
+
+    def GetSecondCharc(self):
+        return self.GATTapp.services[0].characteristics[2]
 
     def register_ad_cb(self):
         print 'Advertisement registered'
