@@ -24,7 +24,7 @@ from Communications import Protocols
 from Communications.Protocols import UARTadapter
 from Communications.BLE.Objects import RobotdBLE
 from Motor import Servo, ServoCtlr
-from Buzzer import BuzzerObj,AngryMelody,HappyMelody,NormalMelody,SadMelody
+from Buzzer import BuzzerObj,AngryMelody,HappyMelody,NormalMelody,SadMelody,BeepCountNote,BeepBeepNote
 from RobotCounter import RobotCounter
 
 class Robotd(Daemon):
@@ -66,13 +66,14 @@ class Robotd(Daemon):
         self.alive = True
 
         self.stateQ = deque([])
-        self.SetState(EventType.NORMAL)
         self.BLEadapter = RobotdBLE()
         self.BLEadapter.Enable()
         self.BLEadapter.AddEmotionWriteCallback(self.BLEemotionCB)
         self.BLEadapter.AddMinuteWriteCallback(self.BLEminuteCB)
         self.BLEadapter.AddSecondWriteCallback(self.BLEsecondCB)
-        
+
+        self.SetState(EventType.NORMAL)
+
         return
    
     def run(self):
@@ -205,20 +206,35 @@ class Robotd(Daemon):
         if eventEnum is EventType.COUNT:
             self.Counter.StartCountDown(self.counterMin,self.counterSec)
         
+        if eventEnum is EventType.NORMAL:
+            self.PlayMelodyNonBlocking(NormalMelody)
+        elif eventEnum is EventType.HAPPY:
+            self.PlayMelodyNonBlocking(HappyMelody)
+        elif eventEnum is EventType.SAD:
+            self.PlayMelodyNonBlocking(SadMelody)
+        elif eventEnum is EventType.ANGRY:
+            self.PlayMelodyNonBlocking(AngryMelody)
 
+        return
+
+    def SwipeEyesOnCounting(self):
+        if self.Leyebrow.isAnimating or self.Reyebrow.isAnimating:
+            return
+
+        tp = [0,50,400]
+        rp = [1500,2300,1500]
+        rrp = [1500,700,1500]
+
+        self.Leyebrow.Animate(tp,rp)
+        self.Reyebrow.Animate(tp,rrp)
+
+    def PlayMelodyNonBlocking(self, melody):
         #non-blockingly play sound
         import threading
         soundThread = None
         buzzer = self.Buzzer
 
-        if eventEnum is EventType.NORMAL:
-            soundThread = threading.Thread(target=buzzer.PlayMelody,args=(NormalMelody,))
-        elif eventEnum is EventType.HAPPY:
-            soundThread = threading.Thread(target=buzzer.PlayMelody,args=(HappyMelody,))
-        elif eventEnum is EventType.SAD:
-            soundThread = threading.Thread(target=buzzer.PlayMelody,args=(SadMelody,))
-        elif eventEnum is EventType.ANGRY:
-            soundThread = threading.Thread(target=buzzer.PlayMelody,args=(AngryMelody,))
+        soundThread = threading.Thread(target=buzzer.PlayMelody,args=(melody,))
 
         if soundThread is not None:
             soundThread.start()

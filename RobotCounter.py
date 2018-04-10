@@ -34,16 +34,33 @@ class RobotCounter(object):
         return
 
     def OnCountCB(self,argMin,argSec):
-        print("bits should be: {0}".format( self.LRmbitsDigits(argMin,argSec) ))
+        mbits = self.LRmbitsDigits(argMin,argSec)
+        #print("bits should be: {0}".format(mbits))
         self.robotd.BLEadapter.GetMinuteCharc().minuteVal = argMin
         self.robotd.BLEadapter.GetMinuteCharc().notify_minute_value()
         self.robotd.BLEadapter.GetSecondCharc().secondVal = argSec
         self.robotd.BLEadapter.GetSecondCharc().notify_second_value()
+
+        self.robotd.LmicroBit.WriteBytes(str(mbits[1]))
+        self.robotd.RmicroBit.WriteBytes(str(mbits[0]))
+
+        if (argMin is 0 and argSec<=10) or \
+        (argMin is not 0 and argSec is 0):
+            self.robotd.SwipeEyesOnCounting()
+            from Buzzer import BeepCountNote
+            self.robotd.PlayMelodyNonBlocking(BeepCountNote)
+
         return
 
     def OnCountFinishCB(self):
-        #ask the robotd to return Normal state
+
         print('Count finish')
+        from Buzzer import BeepBeepNote
+        self.robotd.PlayMelodyNonBlocking(BeepBeepNote)
+        time.sleep(5)
+        #ask the robotd to return Normal state
+        self.robotd.stateQ.append('N')
+        
         return
 
     def IsCounting(self):

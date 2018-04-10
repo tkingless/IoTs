@@ -34,9 +34,10 @@ disconnect (App Level) -> bluetooth dispaired (Device Level)
 
 Connection without Blueman, use bluetoothctl instead:
 
-- blutotthctl
+- bluetoothctl
 	- remove [dev by MAC]
 	- default-agent
+	- then on Android, mannually try to pair with the RPi first
 	- then yes, on the Android side, yes too.
 	- make sure the Andriod shake to confirm connection
 	- exit
@@ -56,3 +57,30 @@ Connection without Blueman, use bluetoothctl instead:
 6. Servo Grd brown line - 0v
 7. Lservo signal - RPi 4
 8. Rservo signal - RPi 12
+9. Buzzer - RPi 26
+
+## Auto up
+
+- sudo systemctl enable pigpiod
+- touch file robotd.service at /lib/systemd/system:
+
+
+[Unit]
+Description=Robotd Service
+After=multi-user.target
+
+[Service]
+Type=simple
+RemainAfterExit=yes
+
+ExecStartPre=/bin/mkdir -p /tmp/Robot
+ExecStart=/home/eduhkstem/Development/Github/venv/robotd/bin/python /home/eduhkstem/Development/Github/IoTs/Robot.py start
+ExecStop=/home/eduhkstem/Development/Github/venv/robotd/bin/python /home/eduhkstem/Development/Github/IoTs/Robot.py stop
+
+[Install]
+WantedBy=multi-user.target
+
+
+- sudo systemctl enable robotd
+
+

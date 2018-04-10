@@ -2,7 +2,7 @@ from Communications import Protocols
 import time
 
 PIobj = Protocols.PIobj
-BeatDuration = 0.11
+BeatDuration = 0.06
 PWM_DutyCycle = 127
 
 class BuzzerObj(object):
@@ -41,10 +41,14 @@ AngryMelody = Melody()
 HappyMelody = Melody()
 NormalMelody = Melody()
 SadMelody = Melody()
+BeepCountNote = Melody()
+BeepBeepNote = Melody()
 
 #AngryMelody.notes = [Note(8000,6,1),Note(6000,1,1),Note(6000,1,2),Note(200,4,1),Note(50,8,4),Note(200,4,1),Note(50,8)]
-AngryMelody.notes = [Note(200,4,1),Note(50,8,4),Note(200,4,1),Note(50,8,4),Note(200,4,1),Note(50,8)]
+AngryMelody.notes = [Note(200,8,2),Note(50,16,32),Note(200,8,2),Note(50,16)]
 HappyMelody.notes = [Note(700,1,1),Note(1000,1),Note(1500,1,2),Note(700,1,1),Note(1000,1),Note(1500,1,2),
 Note(5000,1),Note(6000,2),Note(8000,1,2),Note(5000,1),Note(6000,2),Note(8000,1)] #TODO make it whistling
-NormalMelody.notes = [Note(100,2),Note(50,1)]
-SadMelody.notes = [Note(200,1,1), Note(75,6,2), Note(150,1,1), Note(50,1,1), Note(50,4)]
+NormalMelody.notes = [Note(100,4),Note(50,2)]
+SadMelody.notes = [Note(200,4,4), Note(75,12,4), Note(150,2,2), Note(50,2,2), Note(50,8)]
+BeepCountNote.notes = [Note(1000,2),Note(500,1)]
+BeepBeepNote.notes = [Note(8000,1),Note(4000,1,1),Note(8000,1),Note(4000,1,1),Note(8000,1),Note(4000,1,1),Note(8000,1),Note(4000,1,8), Note(8000,1),Note(4000,1,1),Note(8000,1),Note(4000,1,1),Note(8000,1),Note(4000,1,1),Note(8000,1),Note(4000,1,8), Note(8000,1),Note(4000,1,1),Note(8000,1),Note(4000,1,1),Note(8000,1),Note(4000,1,1),Note(8000,1),Note(4000,1,8), Note(8000,1),Note(4000,1,1),Note(8000,1),Note(4000,1,1),Note(8000,1),Note(4000,1,1),Note(8000,1),Note(4000,1,8)]
