@@ -1,0 +1,14 @@
+[Unit]
+Description=Robotd Service
+After=multi-user.target
+
+[Service]
+Type=simple
+RemainAfterExit=yes
+
+ExecStartPre=/bin/mkdir -p /tmp/Robot
+ExecStart=/home/eduhkstem/Development/Github/venv/robotd/bin/python /home/eduhkstem/Development/Github/IoTs/Robot.py start
+ExecStop=/home/eduhkstem/Development/Github/venv/robotd/bin/python /home/eduhkstem/Development/Github/IoTs/Robot.py stop
+
+[Install]
+WantedBy=multi-user.target
