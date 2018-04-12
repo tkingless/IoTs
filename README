@@ -62,25 +62,36 @@ Connection without Blueman, use bluetoothctl instead:
 ## Auto up
 
 - sudo systemctl enable pigpiod
-- touch file robotd.service at /lib/systemd/system:
-
-
-[Unit]
-Description=Robotd Service
-After=multi-user.target
-
-[Service]
-Type=simple
-RemainAfterExit=yes
-
-ExecStartPre=/bin/mkdir -p /tmp/Robot
-ExecStart=/home/eduhkstem/Development/Github/venv/robotd/bin/python /home/eduhkstem/Development/Github/IoTs/Robot.py start
-ExecStop=/home/eduhkstem/Development/Github/venv/robotd/bin/python /home/eduhkstem/Development/Github/IoTs/Robot.py stop
-
-[Install]
-WantedBy=multi-user.target
-
-
+- refer to Scripts/robotd.service, put at /lib/systemd/system:
 - sudo systemctl enable robotd
 
 
+##Full installation points:
+
+1. Go to website https://www.raspberrypi.org/downloads/
+2. then download ubuntu mate (ubuntu-mate-16.04.2-desktop-armhf-raspberry-pi.img.xz)
+3. Use the unarchiver to extract the file (extracted file name: ubuntu-mate-16.04.2-desktop-armhf-raspberry-pi.img)
+4. Open terminal
+5. use "diskutil list" to find the path of sd card e.g."/dev/disk3"
+6. Unmount the directory e.g.'diskutil unmountDisk "/dev/disk3"'
+7. burn the img file into the sd card, sudo dd if="abs_file_path_name" of="abs_path_of_sd_card" bs=2m
+	- a long wait around 1 hour
+8. Make customization of OS, accounts, bash, git, wifi (need to reboot) etc...
+	- configure git
+9. Clone this project
+10. Set up virtual env: sudo pip install virtualenv
+	- virtualenv {venv}
+	- activate the venv
+	- cd to IoTs, "pip install -r requirements.txt"
+
+11. Update Bluez, already included, 5.41, up to 5.49:
+	- Download http://www.kernel.org/pub/linux/bluetooth/bluez-5.49.tar.xz
+	- tar xvf bluez-5.49.tar.xz
+	- sudo apt-get update
+	- sudo apt-get install -y libusb-dev libdbus-1-dev libglib2.0-dev libudev-dev libical-dev libreadline-dev
+	- ./configure
+	- make
+	- sudo make install
+	- edit /lib/systemd/system/bluetooth.service, append  --experimental to the ExecStart line
+
+10. Enable UART serial monitor by "sudo raspi-config"
