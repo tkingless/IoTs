@@ -185,8 +185,8 @@ class Robotd(Daemon):
             rrp = [1500,1500,1500]
         elif eventEnum is EventType.HAPPY:
             tp = [0,200,1100,1500,2000,2200,3200]
-            rp = [1500,2000,1600,2300,1600,2300,1600]
-            rrp = [1500,1000,1400,700,1400,700,1400]
+            rp = [1500,1750,1550,1900,1300,1900,1550]
+            rrp = [1500,1250,1450,1100,1450,1100,1450]
         elif eventEnum is EventType.SAD:
             tp = [0,1000,2500]
             rp = [1500,1200,1200]
@@ -194,8 +194,8 @@ class Robotd(Daemon):
 
         elif eventEnum is EventType.ANGRY:
             tp = [0,500,2000]
-            rp = [1500,2200,2200]
-            rrp = [1500,800,800]
+            rp = [1500,1850,1850]
+            rrp = [1500,1150,1150]
 
         if tp is not None and \
         rp is not None and \
@@ -222,8 +222,8 @@ class Robotd(Daemon):
             return
 
         tp = [0,50,400]
-        rp = [1500,2300,1500]
-        rrp = [1500,700,1500]
+        rp = [1500,1900,1500]
+        rrp = [1500,1100,1500]
 
         self.Leyebrow.Animate(tp,rp)
         self.Reyebrow.Animate(tp,rrp)
