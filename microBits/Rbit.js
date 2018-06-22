@@ -7,6 +7,28 @@ SerialPin.P0,
 SerialPin.P1,
 BaudRate.BaudRate115200
 )
+basic.showLeds(`
+    . . . . .
+    . . . . .
+    . # # # .
+    . . . . .
+    . . . . .
+    `)
+basic.showLeds(`
+    . . . . .
+    . . # . .
+    . # # # .
+    . . # . .
+    . . . . .
+    `)
+basic.pause(300)
+basic.showLeds(`
+    . . # . .
+    . # . # .
+    . # # . .
+    . # # # .
+    . . # . .
+    `)
 basic.forever(() => {
     readData = serial.readString()
     if (!(readData == "")) {
